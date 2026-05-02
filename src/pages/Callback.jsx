@@ -14,11 +14,18 @@ export default function Callback() {
 
         const username = searchParams.get("username");
         const userId = searchParams.get("userId");
+        const accessToken = searchParams.get("accessToken");
+        const refreshToken = searchParams.get("refreshToken");
 
-        if (!username || !userId) {
+        if (!username || !userId || !accessToken) {
             navigate("/login");
             return;
         }
+
+        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem("refresh_token", refreshToken);
+        localStorage.setItem("username", username);
+        localStorage.setItem("userId", userId);
 
         setUser({ username, userId });
         navigate("/dashboard");

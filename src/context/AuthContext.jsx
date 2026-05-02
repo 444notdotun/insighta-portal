@@ -1,38 +1,33 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import api from "../api/axios";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api.get("/api/users/me")
-        .then((res) => {
-          const { userId, username } = res.data.data;
-          setUser({ userId, username });
-        })
-        .catch(() => {
-          setUser(null);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-  }, []);
+    useEffect(() => {
+        const token = localStorage.getItem("access_token");
+        const username = localStorage.getItem("username");
+        const userId = localStorage.getItem("userId");
+        if (token && username) {
+            setUser({ username, userId });
+        }
+        setLoading(false);
+    }, []);
 
-  const logout = () => {
-    api.post("/auth/logout").catch(() => {});
-    setUser(null);
-  };
+    const logout = () => {
+        localStorage.clear();
+        setUser(null);
+    };
 
-  return (
-      <AuthContext.Provider value={{ user, setUser, logout, loading }}>
-        {children}
-      </AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider value={{ user, setUser, logout, loading }}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+    return useContext(AuthContext);
 }
