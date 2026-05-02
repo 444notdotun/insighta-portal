@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import api from "../api/axios";
 
 const AuthContext = createContext(null);
 
@@ -8,37 +8,28 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        if (decoded.exp * 1000 > Date.now()) {
-          setUser({
-            userId: decoded.sub,
-            role: decoded.role,
-            accessToken: token,
-          });
-        } else {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-        }
-      } catch {
-        localStorage.removeItem("access_token");
-      }
-    }
-    setLoading(false);
+    api.get("/api/users/me")
+        .then((res) => {
+          const { userId, username } = res.data.data;
+          setUser({ userId, username });
+        })
+        .catch(() => {
+          setUser(null);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
   }, []);
 
   const logout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
+    api.post("/auth/logout").catch(() => {});
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, logout, loading }}>
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider value={{ user, setUser, logout, loading }}>
+        {children}
+      </AuthContext.Provider>
   );
 }
 

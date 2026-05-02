@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 
 export default function Callback() {
@@ -13,25 +12,16 @@ export default function Callback() {
         if (called.current) return;
         called.current = true;
 
-        const code = searchParams.get("code");
-        const codeVerifier = localStorage.getItem("code_verifier");
+        const username = searchParams.get("username");
+        const userId = searchParams.get("userId");
 
-        if (!code || !codeVerifier) {
+        if (!username || !userId) {
             navigate("/login");
             return;
         }
 
-        axios
-            .get(`/auth/github/callback?code=${code}&codeVerifier=${codeVerifier}`)
-            .then((res) => {
-                const { accessToken, refreshToken, username, userId } = res.data.data;
-                localStorage.setItem("access_token", accessToken);
-                localStorage.setItem("refresh_token", refreshToken);
-                localStorage.removeItem("code_verifier");
-                setUser({ userId, username, accessToken });
-                setTimeout(() => navigate("/dashboard"), 100);
-            })
-            .catch(() => navigate("/login"));
+        setUser({ username, userId });
+        navigate("/dashboard");
     }, []);
 
     return (
