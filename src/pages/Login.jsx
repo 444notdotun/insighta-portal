@@ -16,12 +16,12 @@ export default function Login() {
             codeVerifier: verifier,
             redirectUrl: "https://insighta-labs.netlify.app/callback",
             isWeb: true
-          }),
-          redirect: "manual"
+          })
         }
     );
 
-    const githubUrl = res.headers.get("location");
+    const data = await res.json();
+    const githubUrl = data.data.githubUrl;
     if (!githubUrl) {
       console.error("No GitHub URL returned from backend");
       return;
