@@ -76,6 +76,7 @@ export default function Dashboard() {
           <span>⚡</span> Insighta Labs<span className="plus">+</span>
         </div>
         <div className="dash-user">
+          <span className="username">@{user?.username}</span>
           <span className="role-badge">{user?.role}</span>
           <button className="logout-btn" onClick={handleLogout}>Logout</button>
         </div>
@@ -139,8 +140,8 @@ export default function Dashboard() {
                       <td>{p.name}</td>
                       <td>{p.gender}</td>
                       <td>{p.age}</td>
-                      <td>{p.ageGroup}</td>
-                      <td>{p.countryId}</td>
+                      <td>{p.age_group}</td>
+                      <td>{p.country_id}</td>
                       {user?.role === "ADMIN" && (
                         <td>
                           <button className="delete-btn"
