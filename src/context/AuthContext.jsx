@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import axios from "../api/axios";
 
 const AuthContext = createContext(null);
 
@@ -7,18 +8,23 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem("access_token");
-        const username = localStorage.getItem("username");
-        const userId = localStorage.getItem("userId");
-        if (token && username) {
-            setUser({ username, userId });
-        }
-        setLoading(false);
+        axios.get("/api/users/me")
+            .then(res => {
+                const { userId, role } = res.data.data;
+                setUser({ userId, role });
+            })
+            .catch(() => {
+                setUser(null);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
     const logout = () => {
-        localStorage.clear();
-        setUser(null);
+        axios.post("/auth/logout", {}).finally(() => {
+            setUser(null);
+        });
     };
 
     return (

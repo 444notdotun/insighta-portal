@@ -24,10 +24,8 @@ export default function Callback() {
 
         axios.post("/auth/github/exchange", { exchangeToken, codeVerifier })
             .then(res => {
-                const { accessToken, refreshToken, username, userId } = res.data.data;
-                localStorage.setItem("access_token", accessToken);
-                localStorage.setItem("refresh_token", refreshToken);
-                setUser({ username, userId, accessToken });
+                const { username, userId } = res.data.data;
+                setUser({ username, userId });
                 navigate("/dashboard");
             })
             .catch(() => navigate("/login"));
