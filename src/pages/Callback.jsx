@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import axios from "../api/axios";
 
 export default function Callback() {
     const [searchParams] = useSearchParams();
@@ -12,23 +13,24 @@ export default function Callback() {
         if (called.current) return;
         called.current = true;
 
-        const username = searchParams.get("username");
-        const userId = searchParams.get("userId");
-        const accessToken = searchParams.get("accessToken");
-        const refreshToken = searchParams.get("refreshToken");
+        const exchangeToken = searchParams.get("exchangeToken");
+        const codeVerifier = sessionStorage.getItem("code_verifier");
+        sessionStorage.removeItem("code_verifier");
 
-        if (!username || !userId || !accessToken) {
+        if (!exchangeToken || !codeVerifier) {
             navigate("/login");
             return;
         }
 
-        localStorage.setItem("access_token", accessToken);
-        localStorage.setItem("refresh_token", refreshToken);
-        localStorage.setItem("username", username);
-        localStorage.setItem("userId", userId);
-
-        setUser({ username, userId });
-        navigate("/dashboard");
+        axios.post("/auth/github/exchange", { exchangeToken, codeVerifier })
+            .then(res => {
+                const { accessToken, refreshToken, username, userId } = res.data.data;
+                localStorage.setItem("access_token", accessToken);
+                localStorage.setItem("refresh_token", refreshToken);
+                setUser({ username, userId, accessToken });
+                navigate("/dashboard");
+            })
+            .catch(() => navigate("/login"));
     }, []);
 
     return (

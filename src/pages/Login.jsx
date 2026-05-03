@@ -1,32 +1,14 @@
 import { useEffect } from "react";
 
+const BASE_URL = "https://insighta-labs-183135031185.us-central1.run.app";
+
 export default function Login() {
   const handleGithubLogin = async () => {
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
-    localStorage.setItem("code_verifier", verifier);
+    sessionStorage.setItem("code_verifier", verifier);
 
-    const res = await fetch(
-        "https://insighta-labs-183135031185.us-central1.run.app/auth/github",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            codeChallenge: challenge,
-            codeVerifier: verifier,
-            redirectUrl: "https://insighta-labs.netlify.app/callback",
-            isWeb: true
-          })
-        }
-    );
-
-    const data = await res.json();
-    const githubUrl = data.data.githubUrl;
-    if (!githubUrl) {
-      console.error("No GitHub URL returned from backend");
-      return;
-    }
-    window.location.href = githubUrl;
+    window.location.href = `${BASE_URL}/auth/github?codeChallenge=${challenge}&redirectUrl=https://insighta-labs.netlify.app/callback&isWeb=true`;
   };
 
   function generateCodeVerifier() {
